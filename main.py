@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 
 # 1. 게임 초기화
 pygame.init()
@@ -155,6 +156,11 @@ while SB:
     for dg in dg_list:
         del ghost_list[dg]
 
+    for i in range(len(ghost_list)):
+        g = ghost_list[i]
+        if crash(g, jet):
+            time.sleep(1)
+            SB = False
 
 
     # 4-4. 그리기
