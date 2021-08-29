@@ -1,4 +1,5 @@
 import pygame
+import random
 
 # 1. 게임 초기화
 pygame.init()
@@ -47,6 +48,7 @@ right_go = False
 space_go = False
 
 bomb_list = []
+ghost_list = []
 k = 0
 
 black = (0, 0, 0)
@@ -107,11 +109,32 @@ while SB:
     for d in d_list:
         del bomb_list[d]
 
+    if random.random() > 0.98:
+        ghost = obj()
+        ghost.put_img("./image/ghost.svg")
+        ghost.change_size(30, 30)
+        ghost.x = random.randrange(0, size[0] - ghost.sx - round(jet.sx / 2))
+        ghost.y = 10
+        ghost.move = 2
+        ghost_list.append(ghost)
+    d_list = []
+    for i in range(len(ghost_list)):
+        g = ghost_list[i]
+        g.y += g.move
+        if g.y >= size[1]:
+            d_list.append(i)
+    d_list.reverse()
+    for d in d_list:
+        del ghost_list[d]
+
+
     # 4-4. 그리기
     screen.fill(black)
     jet.show()
     for b in bomb_list:
         b.show()
+    for g in ghost_list:
+        g.show()
 
     # 4-5. 업데이트
     pygame.display.flip()
