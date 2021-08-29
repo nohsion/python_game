@@ -1,6 +1,7 @@
 import pygame
 import random
 import time
+from datetime import datetime
 
 # 1. 게임 초기화
 pygame.init()
@@ -9,7 +10,7 @@ pygame.init()
 size = [500, 700]
 screen = pygame.display.set_mode(size)
 
-title = "My Game"
+title = "Jet Plane vs. Ghost"
 pygame.display.set_caption(title)
 
 # 3. 게임 내 필요한 설정
@@ -65,9 +66,36 @@ k = 0
 black = (0, 0, 0)
 white = (255, 255, 255)
 
-# 4. 메인 이벤트
+GAME_OVER = False
+kill = 0  # 죽인 유령개수
+loss = 0  # 놓친 유령개수
+
+# 4-0. 게임 시작 대기 화면
 SB = True
+EXIT = False
 while SB:
+    clock.tick(60)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            SB = False
+            EXIT = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                SB = False
+    screen.fill(black)
+    font = pygame.font.Font('C:/Windows/Fonts/ARLRDBD.ttf', 20)
+    text_start = font.render('PRESS SPACE KEY TO START THE GAME', True, (255, 255, 255))
+    screen.blit(text_start, (50, round(size[1] / 2 + 50)))
+
+    font_title = pygame.font.Font('C:/Windows/Fonts/ARLRDBD.ttf', 30)
+    text_title = font_title.render('JET PLANE vs GHOST', True, (255, 255, 255))
+    screen.blit(text_title, (90, round(size[1] / 2 - 50)))
+    pygame.display.flip()
+
+# 4. 메인 이벤트
+start_time = datetime.now()
+SB = True
+while SB and not EXIT:
     # 4-1. FPS 설정
     clock.tick(60)
 
@@ -92,6 +120,9 @@ while SB:
                 space_go = False
 
     # 4-3. 입력, 시간에 따른 변화
+    now_time = datetime.now()
+    delta_time = round((now_time - start_time).total_seconds(), 1)
+
     if left_go:
         jet.x -= jet.move
         if jet.x <= 0:
@@ -134,10 +165,12 @@ while SB:
         g.y += g.move
         if g.y >= size[1]:
             d_list.append(i)
+            loss += 1
     d_list.reverse()
     for d in d_list:
         del ghost_list[d]
 
+    # 미사일과 유령 충돌 시 제거
     db_list = []
     dg_list = []
     for i in range(len(bomb_list)):
@@ -147,6 +180,7 @@ while SB:
             if crash(b, g):
                 db_list.append(i)
                 dg_list.append(j)
+                kill += 1
     db_list = list(set(db_list))
     dg_list = list(set(dg_list))
     db_list.reverse()
@@ -156,12 +190,12 @@ while SB:
     for dg in dg_list:
         del ghost_list[dg]
 
+    # 유령과 제트기 충돌 시 게임 종료
     for i in range(len(ghost_list)):
         g = ghost_list[i]
         if crash(g, jet):
-            time.sleep(1)
+            GAME_OVER = True
             SB = False
-
 
     # 4-4. 그리기
     screen.fill(black)
@@ -171,8 +205,26 @@ while SB:
     for g in ghost_list:
         g.show()
 
+    # 텍스트 게임 화면에 표시하기
+    font = pygame.font.Font('C:/Windows/Fonts/ARLRDBD.ttf', 20)
+    text_kill = font.render(f'killed: {kill} loss: {loss}', True, (255, 255, 0))
+    screen.blit(text_kill, (10, 5))
+
+    text_time = font.render(f'time: {delta_time}', True, (255, 255, 255))
+    screen.blit(text_time, (size[0] - 110, 5))
     # 4-5. 업데이트
     pygame.display.flip()
 
 # 5. 게임 종료
+while GAME_OVER:
+    clock.tick(60)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            GAME_OVER = False
+
+    font = pygame.font.Font('C:/Windows/Fonts/ARLRDBD.ttf', 40)
+    text_start = font.render('GAME OVER', True, (255, 0, 0))
+    screen.blit(text_start, (125, round(size[1] / 2 - 50)))
+    pygame.display.flip()
+
 pygame.quit()
