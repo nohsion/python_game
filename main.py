@@ -36,6 +36,16 @@ class obj:
         screen.blit(self.img, (self.x, self.y))
 
 
+def crash(a, b):
+    if (a.x - b.sx <= b.x) and (b.x <= a.x + a.sx):
+        if (a.y - b.sy <= b.y) and (b.y <= a.y + a.sy):
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
 jet = obj()
 jet.put_img("./image/jet.png")
 jet.change_size(50, 50)
@@ -93,7 +103,7 @@ while SB:
     if space_go and k % 5 == 0:
         bomb = obj()
         bomb.put_img("./image/bomb.svg")
-        bomb.change_size(5, 15)
+        bomb.change_size(7, 15)
         bomb.x = round(jet.x + (jet.sx - bomb.sx) / 2)
         bomb.y = jet.y
         bomb.move = 15
@@ -126,6 +136,25 @@ while SB:
     d_list.reverse()
     for d in d_list:
         del ghost_list[d]
+
+    db_list = []
+    dg_list = []
+    for i in range(len(bomb_list)):
+        for j in range(len(ghost_list)):
+            b = bomb_list[i]
+            g = ghost_list[j]
+            if crash(b, g):
+                db_list.append(i)
+                dg_list.append(j)
+    db_list = list(set(db_list))
+    dg_list = list(set(dg_list))
+    db_list.reverse()
+    dg_list.reverse()
+    for db in db_list:
+        del bomb_list[db]
+    for dg in dg_list:
+        del ghost_list[dg]
+
 
 
     # 4-4. 그리기
